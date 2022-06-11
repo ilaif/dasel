@@ -94,6 +94,22 @@ func findNodesProperty(selector Selector, previousValue reflect.Value, createIfN
 		return nil, &ValueNotFound{Selector: selector.Current, PreviousValue: previousValue}
 	}
 
+	value = derefValue(value)
+	if value.Kind() == reflect.Struct {
+		node := &Node{
+			Value:    nilValue(),
+			Selector: selector,
+		}
+
+		fieldV := value.FieldByName(selector.Property)
+		if fieldV.IsValid() {
+			node.Value = fieldV
+			return []*Node{node}, nil
+		}
+
+		return nil, &ValueNotFound{Selector: selector.Current, PreviousValue: previousValue}
+	}
+
 	return nil, &UnsupportedTypeForSelector{Selector: selector, Value: value}
 }
 

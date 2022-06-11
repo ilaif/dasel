@@ -42,10 +42,20 @@ func propagateValueProperty(n *Node) error {
 	}
 
 	value := unwrapValue(n.Previous.Value)
+	selectorPropertyValue := reflect.ValueOf(n.Selector.Property)
 
 	if value.Kind() == reflect.Map {
-		value.SetMapIndex(reflect.ValueOf(n.Selector.Property), n.Value)
+		value.SetMapIndex(selectorPropertyValue, n.Value)
 		return nil
+	}
+
+	value = derefValue(value)
+	if value.Kind() == reflect.Struct {
+		fieldV := value.FieldByName(selectorPropertyValue.String())
+		if fieldV.IsValid() {
+			fieldV.Set(n.Value)
+			return nil
+		}
 	}
 
 	return &UnsupportedTypeForSelector{Selector: n.Selector, Value: n.Previous.Value}
@@ -110,9 +120,19 @@ func deleteFromParentProperty(n *Node) error {
 	}
 
 	value := unwrapValue(n.Previous.Value)
+	selectorPropertyValue := reflect.ValueOf(n.Selector.Property)
 
 	if value.Kind() == reflect.Map {
-		value.SetMapIndex(reflect.ValueOf(n.Selector.Property), reflect.Value{})
+		value.SetMapIndex(selectorPropertyValue, reflect.Value{})
+		return nil
+	}
+
+	value = derefValue(value)
+	if value.Kind() == reflect.Struct {
+		fieldToDelete := value.FieldByName(selectorPropertyValue.String())
+		if fieldToDelete.IsValid() {
+			fieldToDelete.Set(reflect.Zero(fieldToDelete.Type()))
+		}
 		return nil
 	}
 

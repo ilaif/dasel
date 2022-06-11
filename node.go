@@ -2,11 +2,12 @@ package dasel
 
 import (
 	"fmt"
-	"github.com/tomwright/dasel/storage"
 	"io"
 	"os"
 	"reflect"
 	"regexp"
+
+	"github.com/tomwright/dasel/storage"
 )
 
 // Selector represents the selector for a node.
@@ -108,6 +109,14 @@ func nilValue() reflect.Value {
 func unwrapValue(value reflect.Value) reflect.Value {
 	// value = reflect.Indirect(value)
 	if value.Kind() == reflect.Interface {
+		return value.Elem()
+	}
+	return value
+}
+
+func derefValue(value reflect.Value) reflect.Value {
+	// value = reflect.Indirect(value)
+	if value.Kind() == reflect.Ptr {
 		return value.Elem()
 	}
 	return value

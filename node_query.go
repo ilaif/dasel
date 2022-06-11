@@ -82,6 +82,15 @@ func findValueProperty(n *Node, createIfNotExists bool) (reflect.Value, error) {
 		return nilValue(), &ValueNotFound{Selector: n.Selector.Current, PreviousValue: n.Previous.Value}
 	}
 
+	value = derefValue(value)
+	if value.Kind() == reflect.Struct {
+		fieldValue := value.FieldByName(n.Selector.Property)
+		if fieldValue.IsValid() {
+			return fieldValue, nil
+		}
+		return nilValue(), &ValueNotFound{Selector: n.Selector.Current, PreviousValue: n.Previous.Value}
+	}
+
 	return nilValue(), &UnsupportedTypeForSelector{Selector: n.Selector, Value: value}
 }
 

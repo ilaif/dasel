@@ -2,8 +2,10 @@ package dasel
 
 import (
 	"fmt"
-	"github.com/tomwright/dasel/storage"
+
 	"reflect"
+
+	"github.com/tomwright/dasel/storage"
 )
 
 // Put finds the node using the given selector and updates it's value.
